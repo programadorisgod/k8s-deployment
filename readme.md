@@ -41,9 +41,11 @@ La estructura se organiza siguiendo el **principio de responsabilidad única**, 
 El orden **es secuencial de arriba hacia abajo**.
 Ejecutar los siguientes comandos desde el directorio `k8s-swyw-bd` (sigue el paso a paso y evitate dolores de cabeza, por favor):
 
-> hay que tener habilitado el addon de storage o de lo contrario no se levantará el pod de base dedatos
-
-> microk8s enable hostpath-storage
+> [!TIP]
+> hay que tener habilitado el addon de storage o de lo contrario no se levantará el pod de base de datos
+```bash
+ microk8s enable hostpath-storage
+```
 
 ```bash
 kubectl apply -f ns.yml
