@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: swyw-svc
+  name: swyw-svc
+  namespace: swyw
+spec:
+  ports:
+    - name: auth-pod
+      port: 4000
+      protocol: TCP
+      targetPort: 4000
+  selector:
+    app: swyw
+  type: ClusterIP
