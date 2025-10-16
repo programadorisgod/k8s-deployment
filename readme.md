@@ -78,7 +78,8 @@ kubectl get pvc -A
 kubectl delete pvc postgres-pvc-postgres-0 -n postgres
 ```
 
-> ⚠️ **IMPORTANTE:** Si no eliminas los PVC, podrías tener problemas en el siguiente despliegue debido a volúmenes bloqueados.
+> [!IMPORTANT]
+> Si no eliminas los PVC, podrías tener problemas en el siguiente despliegue debido a volúmenes bloqueados.
 
 ---
 
