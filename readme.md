@@ -6,6 +6,7 @@
 Este documento describe el proceso de despliegue de los servicios del proyecto dentro de un clúster de **Kubernetes**, incluyendo la **base de datos PostgreSQL** y los **servicios backend**.
 Actualmente **no se incluye la parte del frontend**, ya que aún no está preparada para despliegue, la próxima clase lo veremos.
 
+
 ---
 
 ## 📂 Estructura del Proyecto
@@ -39,6 +40,10 @@ La estructura se organiza siguiendo el **principio de responsabilidad única**, 
 
 El orden **es secuencial de arriba hacia abajo**.
 Ejecutar los siguientes comandos desde el directorio `k8s-swyw-bd` (sigue el paso a paso y evitate dolores de cabeza, por favor):
+
+> hay que tener habilitado el addon de storage o de lo contrario no se levantará el pod de base dedatos
+
+> microk8s enable hostpath-storage
 
 ```bash
 kubectl apply -f ns.yml
