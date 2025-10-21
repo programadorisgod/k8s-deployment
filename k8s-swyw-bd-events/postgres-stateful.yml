@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: postgres
+  name: postgres-events
   namespace: postgres
 spec:
   serviceName: "postgres"
