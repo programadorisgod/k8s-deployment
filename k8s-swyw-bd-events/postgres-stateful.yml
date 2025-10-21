@@ -18,29 +18,29 @@ spec:
         - name: postgres
           image: postgres:16.3
           ports:
-            - containerPort: 5432
+            - containerPort: 5433
           env:
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: postgres-secret
+                  name: postgres-secret-events
                   key: DB_USER
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-secret
+                  name: postgres-secret-events
                   key: DB_APP_USER_PASSWORD
             - name: POSTGRES_DB
               valueFrom:
                 secretKeyRef:
-                  name: postgres-secret
+                  name: postgres-secret-events
                   key: DB_NAME_AUTH
           volumeMounts:
-            - name: postgres-pvc
+            - name: postgres-pvc-events
               mountPath: /var/lib/postgresql/data
   volumeClaimTemplates:
     - metadata:
-        name: postgres-pvc
+        name: postgres-pvc-events
       spec:
         accessModes:
           - ReadWriteOnce

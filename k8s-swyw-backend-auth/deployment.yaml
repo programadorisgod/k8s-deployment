@@ -2,18 +2,18 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: swyw
-  name: swyw-deployment
+  name: swyw-deployment-auth
   labels:
-    app: swyw
+    app: swyw-auth
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: swyw
+      app: swyw-auth
   template:
     metadata:
       labels:
-        app: swyw
+        app: swyw-auth
     spec:
       containers:
         - name: swyw-auth
@@ -22,4 +22,4 @@ spec:
             - containerPort: 4000
           envFrom:
             - secretRef:
-                name: backend-secret
+                name: backend-secret-auth

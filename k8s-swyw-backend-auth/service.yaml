@@ -2,8 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: swyw-svc
-  name: swyw-svc
+    app: swyw-svc-auth
+  name: swyw-svc-auth
   namespace: swyw
 spec:
   ports:
@@ -12,5 +12,5 @@ spec:
       protocol: TCP
       targetPort: 4000
   selector:
-    app: swyw
+    app: swyw-auth
   type: ClusterIP

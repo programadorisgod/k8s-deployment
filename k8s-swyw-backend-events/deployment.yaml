@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: swyw
+  name: swyw-deployment-backend-events
+  labels:
+    app: swyw-events
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: swyw-events
+  template:
+    metadata:
+      labels:
+        app: swyw-events
+    spec:
+      containers:
+        - name: swyw-events
+          image: camilodevp/swyw-backend:0.0.1
+          ports:
+            - containerPort: 3002
+          envFrom:
+            - secretRef:
+                name: backend-secret-events

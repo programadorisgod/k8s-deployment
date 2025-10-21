@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: swyw
+  name: swyw-deployment-users
+  labels:
+    app: swyw-users
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: swyw-users
+  template:
+    metadata:
+      labels:
+        app: swyw-users
+    spec:
+      containers:
+        - name: swyw-users
+          image: camilodevp/swyw-users:0.0.1
+          ports:
+            - containerPort: 5002
+          envFrom:
+            - secretRef:
+                name: backend-secret-users
