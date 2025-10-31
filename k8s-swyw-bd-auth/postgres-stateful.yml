@@ -24,17 +24,28 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: postgres-secret-auth
-                  key: DB_USER
+                  key: DB_USER_DEFAULT
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: postgres-secret-auth
-                  key: DB_APP_USER_PASSWORD
+                  key: POSTGRES_PASSWORD
             - name: POSTGRES_DB
               valueFrom:
                 secretKeyRef:
                   name: postgres-secret-auth
                   key: DB_NAME_AUTH
+            - name: DB_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret-auth
+                  key: DB_ADMIN_PASSWORD
+            - name: DB_APP_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret-auth
+                  key: DB_APP_USER_PASSWORD
+
           volumeMounts:
             - name: postgres-pvc-auth
               mountPath: /var/lib/postgresql/data

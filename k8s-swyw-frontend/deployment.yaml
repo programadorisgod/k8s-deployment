@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: swyw
+  name: swyw-deployment-frontend
+  labels:
+    app: swyw-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: swyw-frontend
+  template:
+    metadata:
+      labels:
+        app: swyw-frontend
+    spec:
+      containers:
+        - name: swyw-frontend
+          image: camilodevp/swyw-frontend
+          ports:
+            - containerPort: 80
+          envFrom:
+            - secretRef:
+                name: frontend-secret

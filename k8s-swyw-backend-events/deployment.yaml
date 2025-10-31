@@ -15,6 +15,18 @@ spec:
       labels:
         app: swyw-events
     spec:
+      initContainers:
+        - name: drizzle-init
+          image: camilodevp/swyw-backend:build
+          command: ["sh", "-c"]
+          args:
+            - |
+              npm install drizzle-kit && \
+              npx drizzle-kit generate --config=./src/db/drizzle.config.ts && \
+              npx drizzle-kit migrate --config=./src/db/drizzle.config.ts
+          envFrom:
+            - secretRef:
+                name: backend-secret-events
       containers:
         - name: swyw-events
           image: camilodevp/swyw-backend:0.0.1

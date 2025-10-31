@@ -6,8 +6,8 @@ metadata:
   namespace: postgres
 spec:
   selector:
-    app: postgres
+    app: postgres-events
   ports:
     - protocol: TCP
       port: 5433
-      targetPort: 5433
+      targetPort: 5432

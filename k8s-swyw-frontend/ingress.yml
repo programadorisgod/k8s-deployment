@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-ingress
+  namespace: swyw
+spec:
+  ingressClassName: public
+  rules:
+    - host: frontend.swyw.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: swyw-svc-frontend
+                port:
+                  number: 80
