@@ -32,3 +32,14 @@
     - name: Mostrar el resultado de la verificación del servicio swyw_events
       ansible.builtin.debug:
         msg: "{{ backend_events_output.stdout_lines }}"
+
+    - name: Desplegar el servicio swyw_users
+      ansible.builtin.shell: |
+        kubectl apply -f deployment.yaml
+        kubectl apply -f service.yaml
+      args:
+        chdir: "{{ k8s_backend_users_path }}"
+
+    - name: Verificar el despliegue del servicio swyw_users
+      ansible.builtin.command: kubectl get pods -n swyw
+      register: backend_users_output

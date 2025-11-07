@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluent-bit
+  namespace: logging
+  labels:
+    app: fluent-bit
+spec:
+  selector:
+    matchLabels:
+      app: fluent-bit
+  template:
+    metadata:
+      labels:
+        app: fluent-bit
+    spec:
+      serviceAccountName: fluent-bit
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+      initContainers:
+        - name: init-fluentbit
+          image: busybox:latest
+          command:
+            [
+              "sh",
+              "-c",
+              "mkdir -p /var/lib/fluent-bit && chmod 777 /var/lib/fluent-bit",
+            ]
+          volumeMounts:
+            - name: fluentbit-state
+              mountPath: /var/lib/fluent-bit
+      containers:
+        - name: fluent-bit
+          image: cr.fluentbit.io/fluent/fluent-bit:latest
+          envFrom:
+            - secretRef:
+                name: fluent-bit-secrets
+          volumeMounts:
+            - name: varlog
+              mountPath: /var/log
+            - name: varlibcontainers
+              mountPath: /var/lib/containerd
+              readOnly: true
+            - name: varlogpods
+              mountPath: /var/log/pods
+              readOnly: true
+            - name: config
+              mountPath: /fluent-bit/etc/
+            - name: fluentbit-state
+              mountPath: /var/lib/fluent-bit
+          resources:
+            limits:
+              memory: 200Mi
+              cpu: 200m
+            requests:
+              memory: 200Mi
+              cpu: 200m
+          ports:
+            - containerPort: 2020
+              name: monitor
+          securityContext:
+            runAsUser: 0
+      volumes:
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: varlogpods
+          hostPath:
+            path: /var/log/pods
+        - name: varlibcontainers
+          hostPath:
+            path: /var/lib/containerd
+        - name: config
+          configMap:
+            name: fluent-bit-config
+        - name: fluentbit-state
+          hostPath:
+            path: /var/lib/fluent-bit
+            type: DirectoryOrCreate
