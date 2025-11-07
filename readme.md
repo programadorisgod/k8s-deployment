@@ -9,6 +9,50 @@ Actualmente **no se incluye la parte del frontend**, ya que aún no está prepar
 
 ---
 
+## 🚀 Automatización del despliegue con Ansible
+
+Se ha añadido una carpeta `ansible` que permite automatizar el despliegue de los recursos de Kubernetes usando Ansible. Esto facilita la gestión, repetibilidad y control de los despliegues, evitando la ejecución manual de cada comando.
+
+### 📁 Estructura de la carpeta `ansible`
+
+```
+ansible/
+├── .hosts                # Inventario de Ansible (define los hosts objetivo)
+├── ansible.cfg           # Configuración de Ansible
+├── playbooks/
+│   └── deployment_project_to_cluster.yaml   # Playbook principal de despliegue
+└── roles/
+    └── k8s-deployment-project/
+        └── tasks/
+            ├── create_ns.yaml
+            ├── create_secrets.yaml
+            ├── create_database.yaml
+            ├── database_jobs.yaml
+            ├── deployment_backend.yaml
+            ├── deployment_frotend.yaml
+            ├── create_ingress.yaml
+            └── main.yaml
+```
+
+- El **playbook principal** (`playbooks/deployment_project_to_cluster.yaml`) ejecuta el rol `k8s-deployment-project` sobre el host local.
+- El **rol** contiene tareas organizadas para crear namespaces, secretos, base de datos, backend y recursos de red.
+- El **inventario** (`.hosts`) define el host local para pruebas/despliegue en el mismo equipo.
+
+### ▶️ Ejecución del playbook
+
+Desde la carpeta `ansible`, ejecuta:
+
+```bash
+ansible-playbook playbooks/deployment_project_to_cluster.yaml
+```
+
+Esto realizará automáticamente todos los pasos de despliegue en el orden correcto, incluyendo la creación de namespaces, secretos, base de datos y backend.
+
+> **Nota:** Asegúrate de tener configurado `kubectl` y los manifiestos necesarios en las rutas esperadas, o adapta las tareas para usar el módulo `k8s` de Ansible.
+
+---
+
+
 ## 📂 Estructura del Proyecto
 
 La estructura se organiza siguiendo el **principio de responsabilidad única**, donde cada servicio (backend o base de datos) tiene su propio directorio y manifiestos YAML independientes.  SWYW es el nombre del proyecto en este ejemplo, tu utiliza el que quieras.
