@@ -1,2 +1,4 @@
 k8s-swyw-*/secrets.yaml
 k8s-swyw-bd-*/postgres-secret.yaml
+k8s-fluent-bit/fluent-bit-config.yaml
+k8s-fluent-bit/secrets.yaml
