@@ -1,0 +1,35 @@
+- name: Crear las bases de datos para los servicios
+  block:
+    - name: Crear la base de datos swyw_auth
+      ansible.builtin.shell: |
+        kubectl apply -f postgres-pv.yaml
+        kubectl apply -f postgres-pvc.yaml
+        kubectl apply -f postgres-stateful.yaml
+        kubectl apply -f service.yaml
+      args:
+        chdir: "{{ k8s_bd_auth_path }}"
+
+    - name: Verificar la creación de la base de datos swyw_auth
+      ansible.builtin.command: kubectl get pods -n postgres
+      register: db_auth_output
+
+    - name: Mostrar el resultado de la verificación de la base de datos swyw_auth
+      ansible.builtin.debug:
+        msg: "{{ db_auth_output.stdout_lines }}"
+
+    - name: Crear la base de datos swyw_events
+      ansible.builtin.shell: |
+        kubectl apply -f postgres-pv.yaml
+        kubectl apply -f postgres-pvc.yaml
+        kubectl apply -f postgres-stateful.yaml
+        kubectl apply -f service.yaml
+      args:
+        chdir: "{{ k8s_bd_events_path }}"
+
+    - name: Verificar la creación de la base de datos swyw_events
+      ansible.builtin.command: kubectl get pods -n postgres
+      register: db_events_output
+
+    - name: Mostrar el resultado de la verificación de la base de datos swyw_events
+      ansible.builtin.debug:
+        msg: "{{ db_events_output.stdout_lines }}"

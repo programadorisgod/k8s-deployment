@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: init-database-events
+  namespace: swyw
+spec:
+  backoffLimit: 4
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: db-init
+          image: postgres:15
+          command: ["bash", "-c"]
+          args:
+            - |
+              echo "Creando esquema y roles..."
+              bash /SQL/01-create-db.sh
+              psql -h database-events.postgres.svc.cluster.local -U $PGUSER -d $DB_NAME_AUTH -f /SQL/02-schema.sql
+          env:
+            - name: PGUSER
+              value: "postgres"
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret-events
+                  key: POSTGRES_PASSWORD
+            - name: DB_NAME_AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret-events
+                  key: DB_NAME_EVENTS
+            - name: DB_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret-events
+                  key: DB_ADMIN_PASSWORD
+            - name: DB_APP_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret-events
+                  key: DB_APP_USER_PASSWORD
+            - name: DB_PORT_2
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret-events
+                  key: DB_PORT_2
+          volumeMounts:
+            - name: init-sql
+              mountPath: /SQL
+      volumes:
+        - name: init-sql
+          configMap:
+            name: postgres-init-scripts-events

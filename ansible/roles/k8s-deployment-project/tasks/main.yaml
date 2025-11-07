@@ -1,0 +1,7 @@
+- import_tasks: create_ns.yaml
+- import_tasks: create_secrets.yaml
+- import_tasks: create_database.yaml
+- import_tasks: database_jobs.yaml
+- import_tasks: deployment_backend.yaml
+- import_tasks: deployment_frotend.yaml
+- import_tasks: create_ingress.yaml

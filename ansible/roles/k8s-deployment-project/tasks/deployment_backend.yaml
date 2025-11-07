@@ -1,0 +1,34 @@
+- name: Esperar 5 minutos para que las bases de datos estén arriba
+  ansible.builtin.pause:
+    seconds: 300
+- name: kubectl deployment del backend services
+  block:
+    - name: Desplegar el servicio swyw_auth
+      ansible.builtin.shell: |
+        kubectl apply -f deployment.yaml
+        kubectl apply -f service.yaml
+      args:
+        chdir: "{{ k8s_backend_auth_path }}"
+
+    - name: Verificar el despliegue del servicio swyw_auth
+      ansible.builtin.command: kubectl get pods -n swyw
+      register: backend_auth_output
+
+    - name: Mostrar el resultado de la verificación del servicio swyw_auth
+      ansible.builtin.debug:
+        msg: "{{ backend_auth_output.stdout_lines }}"
+
+    - name: Desplegar el servicio swyw_events
+      ansible.builtin.shell: |
+        kubectl apply -f deployment.yaml
+        kubectl apply -f service.yaml
+      args:
+        chdir: "{{ k8s_backend_events_path }}"
+
+    - name: Verificar el despliegue del servicio swyw_events
+      ansible.builtin.command: kubectl get pods -n swyw
+      register: backend_events_output
+
+    - name: Mostrar el resultado de la verificación del servicio swyw_events
+      ansible.builtin.debug:
+        msg: "{{ backend_events_output.stdout_lines }}"

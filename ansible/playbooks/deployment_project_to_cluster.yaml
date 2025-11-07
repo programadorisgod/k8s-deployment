@@ -1,0 +1,7 @@
+- name: Desplegar el proyecto en el cluster de k8s
+  hosts: local
+  gather_facts: false
+  become: false
+
+  roles:
+    - k8s-deployment-project

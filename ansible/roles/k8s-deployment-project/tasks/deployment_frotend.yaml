@@ -1,0 +1,16 @@
+- name: Desplegar el frontend del proyecto swyw
+  block:
+    - name: Desplegar el servicio swyw-frontend
+      ansible.builtin.shell: |
+        kubectl apply -f deployment.yaml
+        kubectl apply -f service.yaml
+      args:
+        chdir: "{{ k8s_frontend_path }}"
+
+    - name: Verificar el despliegue del servicio swyw-frontend
+      ansible.builtin.command: kubectl get pods -n swyw
+      register: frontend_output
+
+    - name: Mostrar el resultado de la verificación del servicio swyw-frontend
+      ansible.builtin.debug:
+        msg: "{{ frontend_output.stdout_lines }}"

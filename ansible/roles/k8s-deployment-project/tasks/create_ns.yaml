@@ -1,0 +1,27 @@
+- name: Crear namespaces requeridos para el proyecto.
+  block:
+    - name: Crear el namespace swyw
+      ansible.builtin.command: kubectl apply -f ns.yaml
+      args:
+        chdir: "{{k8s_backend_events_path}}"
+
+    - name: Verificar la creación del namespace swyw
+      ansible.builtin.command: kubectl get namespaces
+      register: ns_output
+
+    - name: Mostrar el resultado de la verificación
+      ansible.builtin.debug:
+        msg: "{{ ns_output.stdout_lines }}"
+
+    - name: Crear el namespace postgres
+      ansible.builtin.command: kubectl apply -f ns.yaml
+      args:
+        chdir: "{{k8s_bd_events_path}}"
+
+    - name: Verificar la creación del namespace postgres
+      ansible.builtin.command: kubectl get namespaces
+      register: ns_output_postgres
+
+    - name: Mostrar el resultado de la verificación del namespace postgres
+      ansible.builtin.debug:
+        msg: "{{ ns_output_postgres.stdout_lines }}"

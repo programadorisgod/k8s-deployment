@@ -1,0 +1,35 @@
+- name: Esperar 5 minuitos para que las bases de datos estén listas
+  ansible.builtin.pause:
+    seconds: 300
+
+- name: Crear jobs para las bases de datos
+  block:
+    - name: Crear job para la base de datos swyw_auth
+      ansible.builtin.shell: |
+        kubectl apply -f postgres-init-scripts.yaml -n swyw
+        kubectl apply -f job.yaml  -n swyw
+      args:
+        chdir: "{{ k8s_jobs_db_auth_path }}"
+
+    - name: Verificar la creación del job para la base de datos swyw_auth
+      ansible.builtin.command: kubectl get jobs -n swyw
+      register: job_auth_output
+
+    - name: Mostrar el resultado de la verificación del job para la base de datos swyw_auth
+      ansible.builtin.debug:
+        msg: "{{ job_auth_output.stdout_lines }}"
+
+    - name: Crear job para la base de datos swyw_events
+      ansible.builtin.shell: |
+        kubectl apply -f postgres-init-scripts.yaml  -n swyw
+        kubectl apply -f job.yaml  -n swyw
+      args:
+        chdir: "{{ k8s_jobs_db_events_path }}"
+
+    - name: Verificar la creación del job para la base de datos swyw_events
+      ansible.builtin.command: kubectl get jobs -n swyw
+      register: job_events_output
+
+    - name: Mostrar el resultado de la verificación del job para la base de datos swyw_events
+      ansible.builtin.debug:
+        msg: "{{ job_events_output.stdout_lines }}"

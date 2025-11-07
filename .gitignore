@@ -1,2 +1,2 @@
-k8s-swyw-*/secrets.yml
-k8s-swyw-bd-*/postgres-secret.yml
+k8s-swyw-*/secrets.yaml
+k8s-swyw-bd-*/postgres-secret.yaml

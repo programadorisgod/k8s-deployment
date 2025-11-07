@@ -1,0 +1,12 @@
+# Rutas de microservicios y recursos Kubernetes
+k8s_backend_auth_path: "/home/camidev/Documents/devops/k8s-deployment/k8s-swyw-backend-auth"
+k8s_backend_events_path: "/home/camidev/Documents/devops/k8s-deployment/k8s-swyw-backend-events"
+k8s_backend_users_path: "/home/camidev/Documents/devops/k8s-deployment/k8s-swyw-backend-users"
+k8s_bd_auth_path: "/home/camidev/Documents/devops/k8s-deployment/k8s-swyw-bd-auth"
+k8s_bd_events_path: "/home/camidev/Documents/devops/k8s-deployment/k8s-swyw-bd-events"
+k8s_frontend_path: "/home/camidev/Documents/devops/k8s-deployment/k8s-swyw-frontend"
+k8s_jobs_db_auth_path: "/home/camidev/Documents/devops/k8s-deployment/k8s-jobs-db/auth"
+k8s_jobs_db_events_path: "/home/camidev/Documents/devops/k8s-deployment/k8s-jobs-db/events"
+
+ansible_path: "/home/camidev/Documents/devops/k8s-deployment/ansible"
+sql_path: "/home/camidev/Documents/devops/k8s-deployment/SQL"

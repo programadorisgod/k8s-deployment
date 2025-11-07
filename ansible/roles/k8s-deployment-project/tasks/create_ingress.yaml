@@ -1,0 +1,15 @@
+- name: Esperar 5 minutos para que el frontend esté listo
+  ansible.builtin.pause:
+    seconds: 300
+- name: Crear ingress controller
+  ansible.builtin.command: kubectl apply -f ingress.yaml
+  args:
+    chdir: "{{ k8s_frontend_path }}"
+
+- name: Verificar la creación del ingress controller
+  ansible.builtin.command: kubectl get ingress -n swyw
+  register: ingress_output
+
+- name: Mostrar el resultado de la verificación del ingress controller
+  ansible.builtin.debug:
+    msg: "{{ ingress_output.stdout_lines }}"

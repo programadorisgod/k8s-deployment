@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-events
+  namespace: postgres
+spec:
+  serviceName: "postgres"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-events
+  template:
+    metadata:
+      labels:
+        app: postgres-events
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16.3
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret-events
+                  key: DB_USER_DEFAULT
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret-events
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret-events
+                  key: DB_NAME_EVENTS
+            - name: DB_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret-events
+                  key: DB_ADMIN_PASSWORD
+            - name: DB_APP_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret-events
+                  key: DB_APP_USER_PASSWORD
+          volumeMounts:
+            - name: postgres-pvc-events
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-pvc-events
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
