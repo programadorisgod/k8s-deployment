@@ -1,8 +1,15 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: backend-events-sa
+  namespace: swyw
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: swyw
   name: swyw-deployment-backend-events
+  namespace: swyw
   labels:
     app: swyw-events
 spec:
@@ -14,24 +21,32 @@ spec:
     metadata:
       labels:
         app: swyw-events
+      annotations:
+        # 🔹 Habilita la inyección de Vault Agent
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-init-first: "true"
+
+        # 🔹 Rol de Vault asociado al ServiceAccount
+        vault.hashicorp.com/role: "backend-events-role"
+
+        # 🔹 Secret que será inyectado (ruta exacta en Vault)
+        vault.hashicorp.com/agent-inject-secret-config.json: "kv/data/backend-events"
+
+        # 🔹 Dirección del Vault dentro del cluster (servicio "external-vault")
+        vault.hashicorp.com/agent-inject-vault-addr: "http://external-vault.default.svc.cluster.local:8200"
+
+        # (Opcional) Define formato del archivo secreto
+        vault.hashicorp.com/agent-inject-template-config.json: |
+          {{- with secret "kv/data/backend-events" -}}
+                     {{- toJSON .Data.data }}
+          {{- end }}
     spec:
-      initContainers:
-        - name: drizzle-init
-          image: camilodevp/swyw-backend:build
-          command: ["sh", "-c"]
-          args:
-            - |
-              npm install drizzle-kit && \
-              npx drizzle-kit generate --config=./src/db/drizzle.config.ts && \
-              npx drizzle-kit migrate --config=./src/db/drizzle.config.ts
-          envFrom:
-            - secretRef:
-                name: backend-secret-events
+      serviceAccountName: backend-events-sa
       containers:
         - name: swyw-events
-          image: camilodevp/swyw-backend:0.0.1
+          image: camilodevp/swyw-backend:0.0.5
           ports:
             - containerPort: 3002
-          envFrom:
-            - secretRef:
-                name: backend-secret-events
+          env:
+            - name: CONFIG_PATH
+              value: "/vault/secrets/config.json"

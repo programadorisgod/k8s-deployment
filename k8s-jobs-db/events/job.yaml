@@ -16,7 +16,7 @@ spec:
             - |
               echo "Creando esquema y roles..."
               bash /SQL/01-create-db.sh
-              psql -h database-events.postgres.svc.cluster.local -U $PGUSER -d $DB_NAME_AUTH -f /SQL/02-schema.sql
+              psql -h database-events.postgres.svc.cluster.local -p $DB_PORT_2 -U $PGUSER -d $DB_NAME_AUTH -f /SQL/02-schema.sql
           env:
             - name: PGUSER
               value: "postgres"
