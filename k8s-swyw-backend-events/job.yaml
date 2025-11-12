@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migrate-backend-events
+  namespace: swyw
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: null
+  template:
+    metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "backend-events-role"
+        vault.hashicorp.com/agent-inject-secret-config.json: "kv/data/backend-events"
+        vault.hashicorp.com/agent-inject-vault-addr: "http://external-vault.default.svc.cluster.local:8200"
+        vault.hashicorp.com/env: "VAULT_ADDR=http://external-vault.default.svc.cluster.local:8200"
+        vault.hashicorp.com/agent-inject-template-config.json: |
+          {{- with secret "kv/data/backend-events" -}}
+            {{- toJSON .Data.data }}
+          {{- end }}
+    spec:
+      serviceAccountName: backend-events-sa
+      restartPolicy: Never
+
+      containers:
+        - name: drizzle-migrate
+          image: camilodevp/swyw-backend:build-vault-2
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "⏳ Esperando /vault/secrets/config.json ..."
+              while [ ! -f /vault/secrets/config.json ]; do sleep 1; done
+              echo "✅ Secretos disponibles, corriendo migraciones..."
+              npm install drizzle-kit && \
+              npx drizzle-kit generate --config=./src/db/drizzle.config.ts && \
+              npx drizzle-kit migrate --config=./src/db/drizzle.config.ts || true
+              echo "🕐 Dejando el contenedor en modo debug..."
+              cat /vault/secrets/config.json
+              sleep 3600
+          env:
+            - name: CONFIG_PATH
+              value: "/vault/secrets/config.json"
