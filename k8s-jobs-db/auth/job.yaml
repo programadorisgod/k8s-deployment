@@ -1,45 +1,47 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: init-database
+  name: init-database-auth
   namespace: swyw
 spec:
   backoffLimit: 4
   template:
+    metadata:
+      labels:
+        app: swyw-auth
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-init-first: "true"
+        vault.hashicorp.com/role: "job-auth-role"
+        vault.hashicorp.com/agent-inject-secret-db.env: "kv/data/backend-auth"
+        vault.hashicorp.com/agent-inject-vault-addr: "http://external-vault.default.svc.cluster.local:8200"
+        vault.hashicorp.com/agent-inject-template-db.env: |
+          {{- with secret "kv/data/backend-auth" -}}
+          PGUSER={{ .Data.data.DB_USER_DEFAULT }}
+          PGPASSWORD={{ .Data.data.POSTGRES_PASSWORD }}
+          DB_NAME_AUTH={{ .Data.data.DB_NAME_AUTH }}
+          DB_ADMIN_PASSWORD={{ .Data.data.DB_ADMIN_PASSWORD }}
+          DB_APP_USER_PASSWORD={{ .Data.data.DB_APP_USER_PASSWORD }}
+          DB_PORT={{ .Data.data.DB_PORT }}
+          DB_HOST_AUTH={{ .Data.data.DB_HOST_AUTH }}
+          {{- end }}
     spec:
+      serviceAccountName: job-auth-sa
       restartPolicy: Never
       containers:
         - name: db-init
           image: postgres:15
-          command: ["bash", "-c"]
+          command: ["/bin/bash", "-c"]
           args:
             - |
+              echo "Esperando secrets de Vault..."
+              sleep 2
+              export $(cat /vault/secrets/db.env | xargs)
+              echo "Variables cargadas desde Vault"
               echo "Creando esquema y roles..."
               bash /SQL/01-create-db.sh
-              psql -h postgres.postgres.svc.cluster.local -U $PGUSER -d $DB_NAME_AUTH -f /SQL/02-schema.sql
-          env:
-            - name: PGUSER
-              value: "postgres"
-            - name: PGPASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secret-auth
-                  key: POSTGRES_PASSWORD
-            - name: DB_NAME_AUTH
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secret-auth
-                  key: DB_NAME_AUTH
-            - name: DB_ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secret-auth
-                  key: DB_ADMIN_PASSWORD
-            - name: DB_APP_USER_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secret-auth
-                  key: DB_APP_USER_PASSWORD
+              psql -h $DB_HOST_AUTH -p $DB_PORT -U $PGUSER -d $DB_NAME_AUTH -f /SQL/02-schema.sql
+              echo "Inicialización completada"
           volumeMounts:
             - name: init-sql
               mountPath: /SQL

@@ -13,39 +13,32 @@ spec:
     metadata:
       labels:
         app: postgres
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-init-first: "true"
+        vault.hashicorp.com/role: "postgres-auth-role"
+        vault.hashicorp.com/agent-inject-secret-db.env: "kv/data/postgres-auth"
+        vault.hashicorp.com/agent-inject-vault-addr: "http://external-vault.default.svc.cluster.local:8200"
+        vault.hashicorp.com/agent-inject-template-db.env: |
+          {{- with secret "kv/data/postgres-auth" -}}
+          POSTGRES_USER={{ .Data.data.DB_USER_DEFAULT }}
+          POSTGRES_PASSWORD={{ .Data.data.POSTGRES_PASSWORD }}
+          POSTGRES_DB={{ .Data.data.DB_NAME_AUTH }}
+          DB_ADMIN_PASSWORD={{ .Data.data.DB_ADMIN_PASSWORD }}
+          DB_APP_USER_PASSWORD={{ .Data.data.DB_APP_USER_PASSWORD }}
+          {{- end }}
     spec:
+      serviceAccountName: postgres-auth-sa
       containers:
         - name: postgres
           image: postgres:16.3
           ports:
             - containerPort: 5432
-          env:
-            - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-secret-auth
-                  key: DB_USER_DEFAULT
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-secret-auth
-                  key: POSTGRES_PASSWORD
-            - name: POSTGRES_DB
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-secret-auth
-                  key: DB_NAME_AUTH
-            - name: DB_ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-secret-auth
-                  key: DB_ADMIN_PASSWORD
-            - name: DB_APP_USER_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-secret-auth
-                  key: DB_APP_USER_PASSWORD
-
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              export $(cat /vault/secrets/db.env | xargs)
+              exec docker-entrypoint.sh postgres
           volumeMounts:
             - name: postgres-pvc-auth
               mountPath: /var/lib/postgresql/data

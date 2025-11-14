@@ -6,7 +6,26 @@ metadata:
 spec:
   backoffLimit: 4
   template:
+    metadata:
+      labels:
+        app: swyw-events
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-init-first: "true"
+        vault.hashicorp.com/role: "backend-events-role"
+        vault.hashicorp.com/agent-inject-secret-db.env: "kv/data/backend-events"
+        vault.hashicorp.com/agent-inject-vault-addr: "http://external-vault.default.svc.cluster.local:8200"
+        vault.hashicorp.com/agent-inject-template-db.env: |
+          {{- with secret "kv/data/backend-events" -}}
+          export PGUSER="{{ .Data.data.DB_NAME_DEFAULT }}"
+          export PGPASSWORD="{{ .Data.data.POSTGRES_PASSWORD }}"
+          export DB_NAME_EVENTS="{{ .Data.data.DB_NAME_EVENTS }}"
+          export DB_ADMIN_PASSWORD="{{ .Data.data.DB_ADMIN_PASSWORD }}"
+          export DB_APP_USER_PASSWORD="{{ .Data.data.DB_APP_USER_PASSWORD }}"
+          export DB_PORT_2="{{ .Data.data.DB_PORT_2 }}"
+          {{- end }}
     spec:
+      serviceAccountName: job-events-sa
       restartPolicy: Never
       containers:
         - name: db-init
@@ -14,37 +33,24 @@ spec:
           command: ["bash", "-c"]
           args:
             - |
+              echo "Esperando secrets de Vault..."
+              sleep 2
+              echo "Contenido de /vault/secrets/db.env:"
+              cat /vault/secrets/db.env
+              echo "---"
+              set -a
+              source /vault/secrets/db.env
+              set +a
+              echo "Variables cargadas:"
+              echo "PGUSER=$DB_NAME_DEFAULT"
+              echo "PGPASSWORD=$POSTGRES_PASSWORD"
+              echo "DB_NAME_EVENTS=$DB_NAME_EVENTS"
+              echo "DB_PORT_2=$DB_PORT_2"
+              echo "---"
               echo "Creando esquema y roles..."
               bash /SQL/01-create-db.sh
-              psql -h database-events.postgres.svc.cluster.local -p $DB_PORT_2 -U $PGUSER -d $DB_NAME_AUTH -f /SQL/02-schema.sql
-          env:
-            - name: PGUSER
-              value: "postgres"
-            - name: PGPASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secret-events
-                  key: POSTGRES_PASSWORD
-            - name: DB_NAME_AUTH
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secret-events
-                  key: DB_NAME_EVENTS
-            - name: DB_ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secret-events
-                  key: DB_ADMIN_PASSWORD
-            - name: DB_APP_USER_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secret-events
-                  key: DB_APP_USER_PASSWORD
-            - name: DB_PORT_2
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secret-events
-                  key: DB_PORT_2
+              psql -h database-events.postgres.svc.cluster.local -p $DB_PORT_2 -U $DB_NAME_DEFAULT -d $DB_NAME_EVENTS -f /SQL/02-schema.sql
+              echo "Inicialización completada"
           volumeMounts:
             - name: init-sql
               mountPath: /SQL

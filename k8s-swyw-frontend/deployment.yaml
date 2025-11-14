@@ -14,12 +14,24 @@ spec:
     metadata:
       labels:
         app: swyw-frontend
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-init-first: "true"
+        vault.hashicorp.com/role: "frontend-role"
+        vault.hashicorp.com/agent-inject-secret-frontend.env: "kv/data/frontend"
+        vault.hashicorp.com/agent-inject-vault-addr: "http://external-vault.default.svc.cluster.local:8200"
+        vault.hashicorp.com/agent-inject-template-frontend.env: |
+          {{- with secret "kv/data/frontend" -}}
+          export VITE_API_AUTH="{{ .Data.data.VITE_API_AUTH }}"
+          export VITE_API_NOTES="{{ .Data.data.VITE_API_NOTES }}"
+          {{- end }}
     spec:
+      serviceAccountName: frontend-sa
       containers:
         - name: swyw-frontend
-          image: camilodevp/swyw-frontend
+          image: camilodevp/swyw-frontend:0.0.5
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
-          envFrom:
-            - secretRef:
-                name: frontend-secret
+              name: http
+          command: ["/entrypoint.sh"]

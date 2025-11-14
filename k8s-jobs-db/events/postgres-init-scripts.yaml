@@ -8,12 +8,12 @@ data:
     #!/bin/bash
     set -e
 
-    DB_NAME=${DB_NAME_AUTH:-swyw_events}
+    DB_NAME=${DB_NAME_EVENTS:-swyw_events}
     DB_ADMIN_PASSWORD=${DB_ADMIN_PASSWORD:-default}
     DB_APP_USER_PASSWORD=${DB_APP_USER_PASSWORD:-default}
     POSTGRES_USER=${POSTGRES_USER:-${PGUSER}}
     DB_HOST=${DB_HOST:-database-events.postgres.svc.cluster.local}
-    DB_PORT=${DB_PORT_2:-5433}
+    DB_PORT=${DB_PORT_2:-5432}
 
     echo "=== Creando base de datos ==="
     psql -h "$DB_HOST" -p "$DB_PORT" -U "$POSTGRES_USER" -tc "SELECT 1 FROM pg_database WHERE datname = '$DB_NAME'" | grep -q 1 || \

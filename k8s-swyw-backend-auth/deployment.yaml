@@ -14,12 +14,23 @@ spec:
     metadata:
       labels:
         app: swyw-auth
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-init-first: "true"
+        vault.hashicorp.com/role: "backend-auth-role"
+        vault.hashicorp.com/agent-inject-secret-config.json: "kv/data/backend-auth"
+        vault.hashicorp.com/agent-inject-vault-addr: "http://external-vault.default.svc.cluster.local:8200"
+        vault.hashicorp.com/agent-inject-template-config.json: |
+          {{- with secret "kv/data/backend-auth" -}}
+               {{- toJSON .Data.data }}
+          {{- end }}
     spec:
+      serviceAccountName: backend-auth-sa
       containers:
         - name: swyw-auth
           image: camilodevp/swyw-auth:0.0.1
           ports:
             - containerPort: 4000
-          envFrom:
-            - secretRef:
-                name: backend-secret-auth
+          env:
+            - name: CONFIG_PATH
+              value: "/vault/secrets/config.json"

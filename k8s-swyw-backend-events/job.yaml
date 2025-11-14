@@ -24,7 +24,7 @@ spec:
 
       containers:
         - name: drizzle-migrate
-          image: camilodevp/swyw-backend:build-vault-2
+          image: camilodevp/swyw-backend:build-vault-3
           command: ["sh", "-c"]
           args:
             - |
