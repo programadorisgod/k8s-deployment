@@ -29,7 +29,7 @@ spec:
       serviceAccountName: frontend-sa
       containers:
         - name: swyw-frontend
-          image: camilodevp/swyw-frontend:0.0.5
+          image: camilodevp/swyw-frontend:0.0.6
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
